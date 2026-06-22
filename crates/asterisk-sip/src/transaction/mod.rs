@@ -384,18 +384,15 @@ impl NonInviteClientTransaction {
         let status = response.status_code().unwrap_or(0);
         self.last_response = Some(response);
 
-        match self.state {
-            NonInviteClientState::Trying => {
-                if (100..200).contains(&status) {
-                    self.state = NonInviteClientState::Proceeding;
-                } else if (200..700).contains(&status) {
-                    self.state = NonInviteClientState::Completed;
-                }
+        match (self.state, status) {
+            (NonInviteClientState::Trying, 100..=199) => {
+                self.state = NonInviteClientState::Proceeding;
             }
-            NonInviteClientState::Proceeding => {
-                if (200..700).contains(&status) {
-                    self.state = NonInviteClientState::Completed;
-                }
+            (
+                NonInviteClientState::Trying | NonInviteClientState::Proceeding,
+                200..=699,
+            ) => {
+                self.state = NonInviteClientState::Completed;
             }
             _ => {}
         }

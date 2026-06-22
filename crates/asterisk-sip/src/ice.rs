@@ -684,7 +684,8 @@ impl IceAgent {
         }
 
         // Sort by priority (highest first)
-        self.check_list.sort_by(|a, b| b.priority.cmp(&a.priority));
+        self.check_list
+            .sort_by_key(|pair| std::cmp::Reverse(pair.priority));
 
         // Prune: remove lower-priority pairs with same local/remote addresses
         self.prune_check_list();

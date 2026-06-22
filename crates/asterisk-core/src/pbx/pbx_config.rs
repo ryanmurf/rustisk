@@ -348,13 +348,14 @@ mod tests {
             parse_exten_line("_1XX,1,Dial(SIP/${EXTEN},30)").unwrap();
         assert_eq!(pat, "_1XX");
         assert_eq!(prio, 1);
+        assert!(label.is_none());
         assert_eq!(app, "Dial");
         assert_eq!(data, "SIP/${EXTEN},30");
     }
 
     #[test]
     fn test_parse_exten_line_with_label() {
-        let (pat, prio, label, app, _) =
+        let (_pat, prio, label, _app, _) =
             parse_exten_line("100,1(start),Answer()").unwrap();
         assert_eq!(prio, 1);
         assert_eq!(label.unwrap(), "start");
@@ -419,7 +420,7 @@ exten => 300,1,Answer()
 exten => 100,1,Answer()  ; answer the call
 exten => 100,n,Hangup()
 "#;
-        let (dialplan, result) = load_extensions_conf(config);
+        let (_dialplan, result) = load_extensions_conf(config);
         assert_eq!(result.contexts, 1);
         assert_eq!(result.priorities, 2);
         assert!(result.warnings.is_empty());

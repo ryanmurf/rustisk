@@ -11,6 +11,7 @@
 
 use clap::Parser;
 use std::collections::HashSet;
+use std::io::{BufRead, IsTerminal};
 use std::net::SocketAddr;
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::Arc;
@@ -48,9 +49,9 @@ struct Args {
     #[arg(short = 'f', long = "foreground")]
     foreground: bool,
 
-    /// Run in foreground with console
+    /// Always fork
     #[arg(short = 'F')]
-    foreground_console: bool,
+    always_fork: bool,
 
     /// Dump core on crash
     #[arg(short = 'g')]
@@ -243,7 +244,10 @@ impl ServerState {
                 // Fall through to AMI-style CLI command handler
                 let output = asterisk_ami::actions::execute_cli_command(input);
                 if output.len() == 1 && output[0].starts_with("No such command") {
-                    format!("No such command '{}' (type 'help' for available commands)", input)
+                    format!(
+                        "No such command '{}' (type 'help' for available commands)",
+                        input
+                    )
                 } else {
                     output.join("\n")
                 }
@@ -258,8 +262,12 @@ impl ServerState {
 
 struct CmdCoreShowVersion;
 impl CliCommand for CmdCoreShowVersion {
-    fn command(&self) -> &str { "core show version" }
-    fn description(&self) -> &str { "Display version info" }
+    fn command(&self) -> &str {
+        "core show version"
+    }
+    fn description(&self) -> &str {
+        "Display version info"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         vec![state.version.clone()]
     }
@@ -267,8 +275,12 @@ impl CliCommand for CmdCoreShowVersion {
 
 struct CmdCoreShowUptime;
 impl CliCommand for CmdCoreShowUptime {
-    fn command(&self) -> &str { "core show uptime" }
-    fn description(&self) -> &str { "Show uptime information" }
+    fn command(&self) -> &str {
+        "core show uptime"
+    }
+    fn description(&self) -> &str {
+        "Show uptime information"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         let elapsed = state.start_time.elapsed();
         let total_secs = elapsed.as_secs();
@@ -295,8 +307,12 @@ impl CliCommand for CmdCoreShowUptime {
 
 struct CmdCoreShowChannels;
 impl CliCommand for CmdCoreShowChannels {
-    fn command(&self) -> &str { "core show channels" }
-    fn description(&self) -> &str { "Display information on channels" }
+    fn command(&self) -> &str {
+        "core show channels"
+    }
+    fn description(&self) -> &str {
+        "Display information on channels"
+    }
     fn execute(&self, _args: &[&str], _state: &ServerState) -> Vec<String> {
         let mut lines = Vec::new();
         lines.push(format!(
@@ -311,10 +327,7 @@ impl CliCommand for CmdCoreShowChannels {
             let location = format!("{}@{}:{}", chan.exten, chan.context, chan.priority);
             lines.push(format!(
                 "{:<40} {:<20} {:<15} {:<20}",
-                chan.name,
-                location,
-                chan.state,
-                ""
+                chan.name, location, chan.state, ""
             ));
         }
 
@@ -328,8 +341,12 @@ impl CliCommand for CmdCoreShowChannels {
 
 struct CmdCoreShowBridges;
 impl CliCommand for CmdCoreShowBridges {
-    fn command(&self) -> &str { "core show bridges" }
-    fn description(&self) -> &str { "Display active bridges" }
+    fn command(&self) -> &str {
+        "core show bridges"
+    }
+    fn description(&self) -> &str {
+        "Display active bridges"
+    }
     fn execute(&self, _args: &[&str], _state: &ServerState) -> Vec<String> {
         let mut lines = Vec::new();
         lines.push(format!(
@@ -345,8 +362,12 @@ impl CliCommand for CmdCoreShowBridges {
 
 struct CmdModuleShow;
 impl CliCommand for CmdModuleShow {
-    fn command(&self) -> &str { "module show" }
-    fn description(&self) -> &str { "List loaded modules" }
+    fn command(&self) -> &str {
+        "module show"
+    }
+    fn description(&self) -> &str {
+        "List loaded modules"
+    }
     fn execute(&self, _args: &[&str], _state: &ServerState) -> Vec<String> {
         let mut lines = Vec::new();
         lines.push(format!(
@@ -379,8 +400,12 @@ impl CliCommand for CmdModuleShow {
 
 struct CmdDialplanShow;
 impl CliCommand for CmdDialplanShow {
-    fn command(&self) -> &str { "dialplan show" }
-    fn description(&self) -> &str { "Show loaded dialplan" }
+    fn command(&self) -> &str {
+        "dialplan show"
+    }
+    fn description(&self) -> &str {
+        "Show loaded dialplan"
+    }
     fn execute(&self, _args: &[&str], _state: &ServerState) -> Vec<String> {
         let mut lines = Vec::new();
         let mut total_ext = 0u32;
@@ -392,7 +417,10 @@ impl CliCommand for CmdDialplanShow {
             for ctx_name in ctx_names {
                 let ctx = &dialplan.contexts[ctx_name];
                 total_ctx += 1;
-                lines.push(format!("[ Context '{}' created by 'pbx_config' ]", ctx.name));
+                lines.push(format!(
+                    "[ Context '{}' created by 'pbx_config' ]",
+                    ctx.name
+                ));
                 if ctx.extensions.is_empty() {
                     lines.push("  (no extensions loaded)".to_string());
                 } else {
@@ -428,15 +456,22 @@ impl CliCommand for CmdDialplanShow {
             lines.push(String::new());
         }
 
-        lines.push(format!("-= {} extension(s) in {} context(s). =-", total_ext, total_ctx));
+        lines.push(format!(
+            "-= {} extension(s) in {} context(s). =-",
+            total_ext, total_ctx
+        ));
         lines
     }
 }
 
 struct CmdDialplanReload;
 impl CliCommand for CmdDialplanReload {
-    fn command(&self) -> &str { "dialplan reload" }
-    fn description(&self) -> &str { "Reload the dialplan from extensions.conf" }
+    fn command(&self) -> &str {
+        "dialplan reload"
+    }
+    fn description(&self) -> &str {
+        "Reload the dialplan from extensions.conf"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         reload_dialplan(&state.config_dir)
     }
@@ -444,14 +479,15 @@ impl CliCommand for CmdDialplanReload {
 
 struct CmdHelp;
 impl CliCommand for CmdHelp {
-    fn command(&self) -> &str { "help" }
-    fn description(&self) -> &str { "Display available commands" }
+    fn command(&self) -> &str {
+        "help"
+    }
+    fn description(&self) -> &str {
+        "Display available commands"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         let mut lines = Vec::new();
-        lines.push(format!(
-            "{:<35} {}",
-            "Command", "Description"
-        ));
+        lines.push(format!("{:<35} {}", "Command", "Description"));
         lines.push("-".repeat(70));
 
         let mut cmds: Vec<(&str, &str)> = state
@@ -470,8 +506,12 @@ impl CliCommand for CmdHelp {
 
 struct CmdCoreStopNow;
 impl CliCommand for CmdCoreStopNow {
-    fn command(&self) -> &str { "core stop now" }
-    fn description(&self) -> &str { "Shut down Asterisk immediately" }
+    fn command(&self) -> &str {
+        "core stop now"
+    }
+    fn description(&self) -> &str {
+        "Shut down Asterisk immediately"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         info!("Shutting down...");
         state.running.store(false, Ordering::SeqCst);
@@ -481,8 +521,12 @@ impl CliCommand for CmdCoreStopNow {
 
 struct CmdCoreStopGracefully;
 impl CliCommand for CmdCoreStopGracefully {
-    fn command(&self) -> &str { "core stop gracefully" }
-    fn description(&self) -> &str { "Shut down Asterisk gracefully" }
+    fn command(&self) -> &str {
+        "core stop gracefully"
+    }
+    fn description(&self) -> &str {
+        "Shut down Asterisk gracefully"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         info!("Shutting down gracefully...");
         state.running.store(false, Ordering::SeqCst);
@@ -492,8 +536,12 @@ impl CliCommand for CmdCoreStopGracefully {
 
 struct CmdCoreStopWhenConvenient;
 impl CliCommand for CmdCoreStopWhenConvenient {
-    fn command(&self) -> &str { "core stop when convenient" }
-    fn description(&self) -> &str { "Shut down Asterisk when convenient" }
+    fn command(&self) -> &str {
+        "core stop when convenient"
+    }
+    fn description(&self) -> &str {
+        "Shut down Asterisk when convenient"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         info!("Shutting down when convenient...");
         state.running.store(false, Ordering::SeqCst);
@@ -503,8 +551,12 @@ impl CliCommand for CmdCoreStopWhenConvenient {
 
 struct CmdCoreRestartGracefully;
 impl CliCommand for CmdCoreRestartGracefully {
-    fn command(&self) -> &str { "core restart gracefully" }
-    fn description(&self) -> &str { "Restart Asterisk gracefully" }
+    fn command(&self) -> &str {
+        "core restart gracefully"
+    }
+    fn description(&self) -> &str {
+        "Restart Asterisk gracefully"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         info!("Restarting gracefully (stopping)...");
         state.running.store(false, Ordering::SeqCst);
@@ -514,17 +566,21 @@ impl CliCommand for CmdCoreRestartGracefully {
 
 struct CmdCoreWaitFullyBooted;
 impl CliCommand for CmdCoreWaitFullyBooted {
-    fn command(&self) -> &str { "core waitfullybooted" }
-    fn description(&self) -> &str { "Wait for Asterisk to be fully booted" }
+    fn command(&self) -> &str {
+        "core waitfullybooted"
+    }
+    fn description(&self) -> &str {
+        "Wait for Asterisk to be fully booted"
+    }
     fn execute(&self, _args: &[&str], _state: &ServerState) -> Vec<String> {
-        // Synchronous path (used by local -x execution and console).
+        // Synchronous path used by the local console.
         // For the async path (remote -rx via Unix socket), the socket handler
         // intercepts this command and polls FULLY_BOOTED with async sleep.
         if FULLY_BOOTED.load(Ordering::SeqCst) {
             vec!["Asterisk has fully booted.".to_string()]
         } else {
             // Block synchronously -- this branch is only hit from the console
-            // or local -x mode before full boot, which is unlikely but safe.
+            // before full boot, which is unlikely but safe.
             while !FULLY_BOOTED.load(Ordering::SeqCst) {
                 std::thread::sleep(std::time::Duration::from_millis(100));
             }
@@ -535,8 +591,12 @@ impl CliCommand for CmdCoreWaitFullyBooted {
 
 struct CmdCoreShowSettings;
 impl CliCommand for CmdCoreShowSettings {
-    fn command(&self) -> &str { "core show settings" }
-    fn description(&self) -> &str { "Show PBX core settings" }
+    fn command(&self) -> &str {
+        "core show settings"
+    }
+    fn description(&self) -> &str {
+        "Show PBX core settings"
+    }
     fn execute(&self, _args: &[&str], state: &ServerState) -> Vec<String> {
         let mut lines = Vec::new();
         lines.push("PBX Core Settings".to_string());
@@ -545,8 +605,14 @@ impl CliCommand for CmdCoreShowSettings {
         lines.push(format!("  Configuration directory: {}", state.config_dir));
         lines.push(format!("  Run directory:           {}", state.run_dir));
         lines.push(format!("  PID:                     {}", std::process::id()));
-        lines.push(format!("  Verbose level:           {}", state.verbose_level.load(Ordering::Relaxed)));
-        lines.push(format!("  Debug level:             {}", state.debug_level.load(Ordering::Relaxed)));
+        lines.push(format!(
+            "  Verbose level:           {}",
+            state.verbose_level.load(Ordering::Relaxed)
+        ));
+        lines.push(format!(
+            "  Debug level:             {}",
+            state.debug_level.load(Ordering::Relaxed)
+        ));
         lines.push("  Max calls:               0".to_string());
         lines.push("  Max load:                0.00".to_string());
         lines
@@ -555,8 +621,12 @@ impl CliCommand for CmdCoreShowSettings {
 
 struct CmdCoreSetVerbose;
 impl CliCommand for CmdCoreSetVerbose {
-    fn command(&self) -> &str { "core set verbose" }
-    fn description(&self) -> &str { "Set verbose level" }
+    fn command(&self) -> &str {
+        "core set verbose"
+    }
+    fn description(&self) -> &str {
+        "Set verbose level"
+    }
     fn execute(&self, args: &[&str], state: &ServerState) -> Vec<String> {
         if let Some(level_str) = args.first() {
             if let Ok(level) = level_str.parse::<u8>() {
@@ -570,8 +640,12 @@ impl CliCommand for CmdCoreSetVerbose {
 
 struct CmdCoreSetDebug;
 impl CliCommand for CmdCoreSetDebug {
-    fn command(&self) -> &str { "core set debug" }
-    fn description(&self) -> &str { "Set debug level" }
+    fn command(&self) -> &str {
+        "core set debug"
+    }
+    fn description(&self) -> &str {
+        "Set debug level"
+    }
     fn execute(&self, args: &[&str], state: &ServerState) -> Vec<String> {
         if let Some(level_str) = args.first() {
             if let Ok(level) = level_str.parse::<u8>() {
@@ -585,8 +659,12 @@ impl CliCommand for CmdCoreSetDebug {
 
 struct CmdCdrStatus;
 impl CliCommand for CmdCdrStatus {
-    fn command(&self) -> &str { "cdr status" }
-    fn description(&self) -> &str { "Display CDR engine status" }
+    fn command(&self) -> &str {
+        "cdr status"
+    }
+    fn description(&self) -> &str {
+        "Display CDR engine status"
+    }
     fn execute(&self, _args: &[&str], _state: &ServerState) -> Vec<String> {
         vec![
             "CDR Engine Status:".to_string(),
@@ -599,8 +677,12 @@ impl CliCommand for CmdCdrStatus {
 
 struct CmdTestExecute;
 impl CliCommand for CmdTestExecute {
-    fn command(&self) -> &str { "test execute" }
-    fn description(&self) -> &str { "Execute registered tests" }
+    fn command(&self) -> &str {
+        "test execute"
+    }
+    fn description(&self) -> &str {
+        "Execute registered tests"
+    }
     fn execute(&self, args: &[&str], _state: &ServerState) -> Vec<String> {
         let scope = if args.is_empty() { "all" } else { args[0] };
         let mut lines = Vec::new();
@@ -612,8 +694,12 @@ impl CliCommand for CmdTestExecute {
 
 struct CmdTestShowResults;
 impl CliCommand for CmdTestShowResults {
-    fn command(&self) -> &str { "test show results" }
-    fn description(&self) -> &str { "Show test results" }
+    fn command(&self) -> &str {
+        "test show results"
+    }
+    fn description(&self) -> &str {
+        "Show test results"
+    }
     fn execute(&self, _args: &[&str], _state: &ServerState) -> Vec<String> {
         let mut lines = Vec::new();
         lines.push(format!(
@@ -686,8 +772,8 @@ fn resolve_dirs(config_file: Option<&str>) -> AsteriskDirs {
                     continue;
                 }
                 if in_directories {
-                    if let Some((key, value)) = trimmed.split_once("=>")
-                        .or_else(|| trimmed.split_once('='))
+                    if let Some((key, value)) =
+                        trimmed.split_once("=>").or_else(|| trimmed.split_once('='))
                     {
                         let key = key.trim();
                         let value = value.trim();
@@ -718,7 +804,7 @@ fn resolve_dirs(config_file: Option<&str>) -> AsteriskDirs {
 /// is closed.
 async fn start_control_socket(
     run_dir: &str,
-    state: Arc<tokio::sync::RwLock<ServerState>>,
+    state: Arc<ServerState>,
 ) -> Result<(), std::io::Error> {
     let socket_path = std::path::Path::new(run_dir).join("asterisk.ctl");
 
@@ -760,10 +846,7 @@ async fn start_control_socket(
 /// the normal (synchronous) CliCommand trait, this handler polls the global
 /// [`FULLY_BOOTED`] flag asynchronously so it can wait without blocking the
 /// Tokio runtime.
-async fn handle_control_connection(
-    stream: tokio::net::UnixStream,
-    state: Arc<tokio::sync::RwLock<ServerState>>,
-) {
+async fn handle_control_connection(stream: tokio::net::UnixStream, state: Arc<ServerState>) {
     let (reader, mut writer) = stream.into_split();
     let mut buf_reader = BufReader::new(reader);
     let mut line = String::new();
@@ -777,8 +860,7 @@ async fn handle_control_connection(
             // Intercept "core waitfullybooted" for async waiting
             let output = if cmd.eq_ignore_ascii_case("core waitfullybooted") {
                 // Wait up to 30 seconds for full boot
-                let deadline = tokio::time::Instant::now()
-                    + std::time::Duration::from_secs(30);
+                let deadline = tokio::time::Instant::now() + std::time::Duration::from_secs(30);
                 while !FULLY_BOOTED.load(Ordering::SeqCst) {
                     if tokio::time::Instant::now() >= deadline {
                         break;
@@ -791,8 +873,7 @@ async fn handle_control_connection(
                     "Timeout waiting for Asterisk to fully boot.".to_string()
                 }
             } else {
-                let s = state.read().await;
-                s.execute_command(cmd)
+                state.execute_command(cmd)
             };
 
             let _ = writer.write_all(output.as_bytes()).await;
@@ -805,46 +886,33 @@ async fn handle_control_connection(
     }
 }
 
-/// Connect to a running instance via the Unix control socket and execute a command.
-///
-/// This is used when `-r -x "command"` is passed.
-/// Retries up to 3 times with 500ms delay if the socket is not yet ready.
-async fn remote_execute(
-    config_file: Option<&str>,
-    command: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let dirs = resolve_dirs(config_file);
-    let socket_path = std::path::Path::new(&dirs.run_dir).join("asterisk.ctl");
+/// Resolve the Unix control socket path for remote CLI operations.
+fn control_socket_path(config_file: Option<&str>, socket: Option<&str>) -> std::path::PathBuf {
+    if let Some(socket) = socket {
+        return std::path::PathBuf::from(socket);
+    }
 
-    // Retry connection up to 10 times with exponential backoff starting at 200ms.
+    let dirs = resolve_dirs(config_file);
+    std::path::Path::new(&dirs.run_dir).join("asterisk.ctl")
+}
+
+/// Connect to a running instance via the Unix control socket.
+///
+/// Retries because a daemon that just started may not have created the socket yet.
+async fn connect_control_socket(
+    config_file: Option<&str>,
+    socket: Option<&str>,
+) -> Result<tokio::net::UnixStream, std::io::Error> {
+    let socket_path = control_socket_path(config_file, socket);
+
+    // Retry briefly with exponential backoff.
     // The daemon may not have created the socket file yet if it was just started.
     let mut last_err = None;
-    let max_attempts = 10;
-    let mut delay_ms = 200u64;
+    let max_attempts = 6;
+    let mut delay_ms = 100u64;
     for attempt in 0..max_attempts {
         match tokio::net::UnixStream::connect(&socket_path).await {
-            Ok(stream) => {
-                let (reader, mut writer) = stream.into_split();
-
-                // Send the command
-                writer.write_all(command.as_bytes()).await?;
-                writer.write_all(b"\n").await?;
-
-                // Read the response
-                let mut buf_reader = BufReader::new(reader);
-                let mut response = String::new();
-                loop {
-                    let mut line = String::new();
-                    match buf_reader.read_line(&mut line).await {
-                        Ok(0) => break,
-                        Ok(_) => response.push_str(&line),
-                        Err(_) => break,
-                    }
-                }
-
-                print!("{}", response);
-                return Ok(());
-            }
+            Ok(stream) => return Ok(stream),
             Err(e) => {
                 last_err = Some(e);
                 if attempt < max_attempts - 1 {
@@ -854,13 +922,110 @@ async fn remote_execute(
                         delay_ms
                     );
                     tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
-                    delay_ms = (delay_ms * 2).min(2000); // cap at 2s
+                    delay_ms = (delay_ms * 2).min(1000);
                 }
             }
         }
     }
 
-    Err(Box::new(last_err.unwrap()))
+    Err(last_err.unwrap_or_else(|| {
+        std::io::Error::new(std::io::ErrorKind::NotFound, "control socket unavailable")
+    }))
+}
+
+/// Send one CLI command over the Unix control socket and return its output.
+async fn remote_command(
+    config_file: Option<&str>,
+    socket: Option<&str>,
+    command: &str,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let stream = connect_control_socket(config_file, socket).await?;
+    let (reader, mut writer) = stream.into_split();
+
+    writer.write_all(command.as_bytes()).await?;
+    writer.write_all(b"\n").await?;
+
+    let mut buf_reader = BufReader::new(reader);
+    let mut response = String::new();
+    loop {
+        let mut line = String::new();
+        match buf_reader.read_line(&mut line).await {
+            Ok(0) => break,
+            Ok(_) => response.push_str(&line),
+            Err(_) => break,
+        }
+    }
+
+    Ok(response)
+}
+
+/// Execute a single remote CLI command and print the response.
+async fn remote_execute(
+    config_file: Option<&str>,
+    socket: Option<&str>,
+    command: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    print!("{}", remote_command(config_file, socket, command).await?);
+    Ok(())
+}
+
+/// Connect to a running instance and provide a simple remote CLI.
+async fn remote_console(
+    config_file: Option<&str>,
+    socket: Option<&str>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Verify compatibility with upstream `asterisk -r`: fail immediately when
+    // no daemon control socket is available instead of starting a new daemon.
+    drop(connect_control_socket(config_file, socket).await?);
+
+    if std::io::stdin().is_terminal() {
+        let config = rustyline::Config::builder()
+            .history_ignore_space(true)
+            .max_history_size(1000)
+            .expect("valid history size")
+            .build();
+        let mut rl =
+            rustyline::DefaultEditor::with_config(config).expect("Failed to create line editor");
+        let history_path = dirs_home().join(".asterisk_history");
+        let _ = rl.load_history(&history_path);
+
+        loop {
+            match rl.readline("asterisk*CLI> ") {
+                Ok(line) => {
+                    let trimmed = line.trim();
+                    if trimmed.is_empty() {
+                        continue;
+                    }
+                    if trimmed.eq_ignore_ascii_case("quit") || trimmed.eq_ignore_ascii_case("exit")
+                    {
+                        break;
+                    }
+                    let _ = rl.add_history_entry(trimmed);
+                    print!("{}", remote_command(config_file, socket, trimmed).await?);
+                }
+                Err(rustyline::error::ReadlineError::Interrupted) => continue,
+                Err(rustyline::error::ReadlineError::Eof) => break,
+                Err(err) => return Err(Box::new(err)),
+            }
+        }
+
+        let _ = rl.save_history(&history_path);
+    } else {
+        let stdin = std::io::stdin();
+        for line in stdin.lock().lines() {
+            let line = line?;
+            let trimmed = line.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+            if trimmed.eq_ignore_ascii_case("quit") || trimmed.eq_ignore_ascii_case("exit") {
+                break;
+            }
+            print!("{}", remote_command(config_file, socket, trimmed).await?);
+        }
+    }
+
+    Ok(())
 }
 
 // ============================================================================
@@ -892,7 +1057,9 @@ fn parse_manager_conf(config_dir: &str) -> ManagerConfig {
 
     if !manager_path.exists() {
         // No manager.conf -- fall back to admin/admin
-        config.users.push(asterisk_ami::auth::AmiUser::new("admin", "admin"));
+        config
+            .users
+            .push(asterisk_ami::auth::AmiUser::new("admin", "admin"));
         return config;
     }
 
@@ -900,7 +1067,9 @@ fn parse_manager_conf(config_dir: &str) -> ManagerConfig {
         Ok(c) => c,
         Err(e) => {
             warn!("Could not read manager.conf: {}, using defaults", e);
-            config.users.push(asterisk_ami::auth::AmiUser::new("admin", "admin"));
+            config
+                .users
+                .push(asterisk_ami::auth::AmiUser::new("admin", "admin"));
             return config;
         }
     };
@@ -910,12 +1079,15 @@ fn parse_manager_conf(config_dir: &str) -> ManagerConfig {
     let mut current_secret: Option<String> = None;
 
     // Helper to flush a pending user
-    let flush_user = |config: &mut ManagerConfig, name: &Option<String>, secret: &Option<String>| {
-        if let Some(ref uname) = name {
-            let sec = secret.as_deref().unwrap_or("");
-            config.users.push(asterisk_ami::auth::AmiUser::new(uname, sec));
-        }
-    };
+    let flush_user =
+        |config: &mut ManagerConfig, name: &Option<String>, secret: &Option<String>| {
+            if let Some(ref uname) = name {
+                let sec = secret.as_deref().unwrap_or("");
+                config
+                    .users
+                    .push(asterisk_ami::auth::AmiUser::new(uname, sec));
+            }
+        };
 
     for line in content.lines() {
         let trimmed = line.trim();
@@ -965,11 +1137,10 @@ fn parse_manager_conf(config_dir: &str) -> ManagerConfig {
                         config.bind_addr = value.to_string();
                     }
                 }
+                Some(_) if key.eq_ignore_ascii_case("secret") => {
+                    current_secret = Some(value.to_string());
+                }
                 Some(_) => {
-                    // User section
-                    if key.eq_ignore_ascii_case("secret") {
-                        current_secret = Some(value.to_string());
-                    }
                     // read/write permissions are handled via AmiUser::new (defaults to ALL)
                 }
                 None => {}
@@ -982,16 +1153,25 @@ fn parse_manager_conf(config_dir: &str) -> ManagerConfig {
 
     // If no users were found, add default
     if config.users.is_empty() {
-        config.users.push(asterisk_ami::auth::AmiUser::new("admin", "admin"));
+        config
+            .users
+            .push(asterisk_ami::auth::AmiUser::new("admin", "admin"));
     }
 
-    info!("Loaded {} AMI user(s) from manager.conf", config.users.len());
+    info!(
+        "Loaded {} AMI user(s) from manager.conf",
+        config.users.len()
+    );
     config
 }
 
 /// Parse ari.conf and return (enabled, AriConfig) -- kept for future use.
 #[allow(dead_code)]
-fn load_ari_conf(config_dir: &str, http_bind_addr: &str, http_port: u16) -> (bool, asterisk_ari::AriConfig) {
+fn load_ari_conf(
+    config_dir: &str,
+    http_bind_addr: &str,
+    http_port: u16,
+) -> (bool, asterisk_ari::AriConfig) {
     let ari_path = std::path::Path::new(config_dir).join("ari.conf");
     let mut ari_enabled = true;
     let mut allowed_origins = vec!["*".to_string()];
@@ -999,7 +1179,10 @@ fn load_ari_conf(config_dir: &str, http_bind_addr: &str, http_port: u16) -> (boo
     let mut pretty_print = false;
 
     if !ari_path.exists() {
-        info!("No ari.conf found at {}, ARI will use defaults", ari_path.display());
+        info!(
+            "No ari.conf found at {}, ARI will use defaults",
+            ari_path.display()
+        );
         // Add a default user so ARI is accessible
         users.push(asterisk_ari::server::AriUser {
             username: "asterisk".to_string(),
@@ -1134,7 +1317,11 @@ fn load_ari_conf(config_dir: &str, http_bind_addr: &str, http_port: u16) -> (boo
         });
     }
 
-    info!("Loaded ari.conf: enabled={}, {} user(s)", ari_enabled, users.len());
+    info!(
+        "Loaded ari.conf: enabled={}, {} user(s)",
+        ari_enabled,
+        users.len()
+    );
 
     let config = asterisk_ari::AriConfig {
         enabled: ari_enabled,
@@ -1199,7 +1386,11 @@ fn create_module_stubs(mod_dir: &str) {
 fn create_buildopts_h(include_dir: &str) {
     let dir = std::path::Path::new(include_dir).join("asterisk");
     if let Err(e) = std::fs::create_dir_all(&dir) {
-        warn!("Could not create include directory {}: {}", dir.display(), e);
+        warn!(
+            "Could not create include directory {}: {}",
+            dir.display(),
+            e
+        );
         return;
     }
 
@@ -1257,7 +1448,10 @@ fn init_logging(
             Ok(guard) => return Some(guard),
             Err(e) => {
                 // Fall through to plain logging if OTel init fails.
-                eprintln!("Warning: OpenTelemetry init failed ({}), using plain logging", e);
+                eprintln!(
+                    "Warning: OpenTelemetry init failed ({}), using plain logging",
+                    e
+                );
             }
         }
     }
@@ -1311,11 +1505,17 @@ fn load_dialplan(config_dir: &str) -> Arc<asterisk_core::pbx::Dialplan> {
                 return Arc::new(dialplan);
             }
             Err(e) => {
-                info!("Could not read extensions.conf: {}, using empty dialplan", e);
+                info!(
+                    "Could not read extensions.conf: {}, using empty dialplan",
+                    e
+                );
             }
         }
     } else {
-        info!("No extensions.conf found at {}, using empty dialplan", extensions_path.display());
+        info!(
+            "No extensions.conf found at {}, using empty dialplan",
+            extensions_path.display()
+        );
     }
 
     // Return empty dialplan with a default context
@@ -1410,8 +1610,14 @@ fn reload_dialplan(config_dir: &str) -> Vec<String> {
     } else {
         for name in &added {
             let ext_count = new_contexts[**name];
-            info!("dialplan reload: context '{}' added ({} extension(s))", name, ext_count);
-            output.push(format!("  Context '{}' added ({} extension(s))", name, ext_count));
+            info!(
+                "dialplan reload: context '{}' added ({} extension(s))",
+                name, ext_count
+            );
+            output.push(format!(
+                "  Context '{}' added ({} extension(s))",
+                name, ext_count
+            ));
         }
         for name in &removed {
             info!("dialplan reload: context '{}' removed", name);
@@ -1445,10 +1651,7 @@ fn reload_dialplan(config_dir: &str) -> Vec<String> {
 /// Content=line2
 /// Content=>
 /// ```
-fn load_pjsip_notify_config(
-    content: &str,
-    config: &asterisk_sip::notify::NotifyConfig,
-) {
+fn load_pjsip_notify_config(content: &str, config: &asterisk_sip::notify::NotifyConfig) {
     let mut _current_name: Option<String> = None;
     let mut current_template: Option<asterisk_sip::notify::NotifyTemplate> = None;
 
@@ -1516,20 +1719,14 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
 
     // Also build the local registry for introspection
     let app_registry = asterisk_apps::AppRegistry::with_builtins();
-    info!(
-        "Loaded {} dialplan applications",
-        app_registry.count()
-    );
+    info!("Loaded {} dialplan applications", app_registry.count());
     for name in app_registry.list() {
         debug!("  Application: {}", name);
     }
 
     info!("Loading dialplan functions...");
     let func_registry = asterisk_funcs::FuncRegistry::with_builtins();
-    info!(
-        "Loaded {} dialplan functions",
-        func_registry.count()
-    );
+    info!("Loaded {} dialplan functions", func_registry.count());
 
     info!("Initializing CDR engine...");
     let cdr_engine = asterisk_cdr::CdrEngine::new();
@@ -1566,7 +1763,10 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
                 }
             }
         } else {
-            info!("No pjsip.conf found at {}, using defaults", pjsip_path.display());
+            info!(
+                "No pjsip.conf found at {}, using defaults",
+                pjsip_path.display()
+            );
             None
         }
     };
@@ -1611,7 +1811,9 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
     TECH_REGISTRY.register(Arc::new(asterisk_channels::local::LocalChannelDriver::new()));
 
     // Register SIP/PJSIP channel driver
-    let sip_driver = Arc::new(asterisk_sip::channel_driver::SipChannelDriver::new(sip_bind));
+    let sip_driver = Arc::new(asterisk_sip::channel_driver::SipChannelDriver::new(
+        sip_bind,
+    ));
     let sip_driver_ref = sip_driver.clone();
     TECH_REGISTRY.register(sip_driver);
     info!("Registered PJSIP channel technology");
@@ -1684,14 +1886,15 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
 
                 // Wire the SIP event handler to consume events from the stack
                 if let Some(mut rx) = event_rx {
-                    let transport_for_handler: Arc<dyn asterisk_sip::transport::SipTransport> = transport.clone();
-                    let transport_for_options: Arc<dyn asterisk_sip::transport::SipTransport> = transport.clone();
-                    let event_handler = Arc::new(
-                        asterisk_sip::event_handler::SipEventHandler::new(
+                    let transport_for_handler: Arc<dyn asterisk_sip::transport::SipTransport> =
+                        transport.clone();
+                    let transport_for_options: Arc<dyn asterisk_sip::transport::SipTransport> =
+                        transport.clone();
+                    let event_handler =
+                        Arc::new(asterisk_sip::event_handler::SipEventHandler::new(
                             dialplan.clone(),
                             transport_for_handler,
-                        ),
-                    );
+                        ));
                     asterisk_sip::set_global_event_handler(event_handler.clone());
                     tokio::spawn(async move {
                         while let Some(event) = rx.recv().await {
@@ -1710,7 +1913,9 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
                                     remote_addr,
                                 } => {
                                     event_handler.handle_response(&response, remote_addr).await;
-                                    event_handler.handle_reinvite_response(&response, remote_addr).await;
+                                    event_handler
+                                        .handle_reinvite_response(&response, remote_addr)
+                                        .await;
                                 }
                                 asterisk_sip::stack::SipEvent::IncomingBye {
                                     call_id: _,
@@ -1725,18 +1930,22 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
                                 } => {
                                     // Handle OPTIONS with 200 OK
                                     if request.method() == Some(asterisk_sip::SipMethod::Options) {
-                                        if let Ok(mut ok_resp) = request.create_response(200, "OK") {
-                                            ok_resp.add_header("Allow", "INVITE, ACK, CANCEL, BYE, OPTIONS, REFER, NOTIFY");
+                                        if let Ok(mut ok_resp) = request.create_response(200, "OK")
+                                        {
+                                            ok_resp.add_header(
+                                                "Allow",
+                                                "INVITE, ACK, CANCEL, BYE, OPTIONS, REFER, NOTIFY",
+                                            );
                                             ok_resp.add_header("Accept", "application/sdp");
                                             ok_resp.add_header("Server", "Asterisk-RS/0.1.0");
-                                            let _ = transport_for_options.send(&ok_resp, remote_addr).await;
+                                            let _ = transport_for_options
+                                                .send(&ok_resp, remote_addr)
+                                                .await;
                                             debug!("Sent 200 OK for OPTIONS from {}", remote_addr);
                                         }
                                     }
                                 }
-                                asterisk_sip::stack::SipEvent::TransactionTimeout {
-                                    branch,
-                                } => {
+                                asterisk_sip::stack::SipEvent::TransactionTimeout { branch } => {
                                     debug!("Transaction timed out: {}", branch);
                                 }
                             }
@@ -1793,9 +2002,7 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
     // Wire the channel event publisher to the AMI event bus
     // =========================================================================
     asterisk_core::register_channel_event_publisher(Box::new(|name, headers| {
-        asterisk_ami::publish_event(
-            asterisk_ami::AmiEvent::new_with_headers(name, headers),
-        );
+        asterisk_ami::publish_event(asterisk_ami::AmiEvent::new_with_headers(name, headers));
     }));
 
     info!(
@@ -1807,8 +2014,7 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
     // Emit FullyBooted event (SYSTEM category = 0x01)
     asterisk_ami::set_fully_booted();
     asterisk_ami::publish_event(
-        asterisk_ami::AmiEvent::new("FullyBooted", 0x01)
-            .with_header("Status", "Fully Booted"),
+        asterisk_ami::AmiEvent::new("FullyBooted", 0x01).with_header("Status", "Fully Booted"),
     );
 }
 
@@ -1820,8 +2026,8 @@ fn run_console(state: &ServerState) {
         .expect("valid history size")
         .build();
 
-    let mut rl = rustyline::DefaultEditor::with_config(config)
-        .expect("Failed to create line editor");
+    let mut rl =
+        rustyline::DefaultEditor::with_config(config).expect("Failed to create line editor");
 
     // Load history
     let history_path = dirs_home().join(".asterisk_history");
@@ -1861,7 +2067,10 @@ fn run_console(state: &ServerState) {
                         }
                     }
                     None => {
-                        println!("No such command '{}' (type 'help' for available commands)", input);
+                        println!(
+                            "No such command '{}' (type 'help' for available commands)",
+                            input
+                        );
                     }
                 }
             }
@@ -1925,56 +2134,38 @@ async fn main() {
         std::process::exit(0);
     }
 
-    // -F implies both foreground and console
-    let foreground = args.foreground || args.foreground_console;
-    let console = args.console || args.foreground_console;
+    let foreground = args.foreground;
+    let console = args.console;
+    // Accepted for Asterisk CLI compatibility. This implementation does not
+    // daemonize, so `-F` must only avoid changing foreground/console behavior.
+    let _always_fork = args.always_fork;
 
     // Resolve directories from config
     let dirs = resolve_dirs(args.config_file.as_deref());
     let config_dir = dirs.config_dir.clone();
     let run_dir = dirs.run_dir.clone();
 
-    // Handle -r -x (remote execute against running instance)
-    if args.remote {
+    // Handle remote CLI modes. Upstream Asterisk treats `-x` as implying
+    // remote execution, so both `-rx "cmd"` and bare `-x "cmd"` use the
+    // already-running daemon's control socket.
+    if args.remote || args.execute.is_some() {
+        let _otel_guard = init_logging(0, 0, true); // quiet logging for remote mode
         if let Some(ref cmd_str) = args.execute {
-            // Remote execute mode: connect to control socket, send command, print result
-            let _otel_guard = init_logging(0, 0, true); // quiet logging for remote mode
-            match remote_execute(args.config_file.as_deref(), cmd_str).await {
+            match remote_execute(args.config_file.as_deref(), args.socket.as_deref(), cmd_str).await
+            {
                 Ok(()) => std::process::exit(0),
                 Err(e) => {
                     eprintln!("Unable to connect to remote asterisk ({})", e);
                     std::process::exit(1);
                 }
             }
-        }
-    }
-
-    // Handle -x without -r (execute locally, full startup)
-    if let Some(ref cmd_str) = args.execute {
-        // Initialize logging
-        let _otel_guard = init_logging(args.verbose, args.debug, args.quiet);
-
-        // Run startup sequence
-        startup_sequence(&config_dir, &dirs).await;
-
-        // Mark fully booted so local commands see the right state
-        FULLY_BOOTED.store(true, Ordering::SeqCst);
-
-        let running = Arc::new(AtomicBool::new(true));
-        let mut state = ServerState::new(running, &config_dir, &run_dir);
-        state.register_builtins();
-
-        match state.find_command(cmd_str) {
-            Some((cmd, cmd_args)) => {
-                let output = cmd.execute(&cmd_args, &state);
-                for line in output {
-                    println!("{}", line);
+        } else {
+            match remote_console(args.config_file.as_deref(), args.socket.as_deref()).await {
+                Ok(()) => std::process::exit(0),
+                Err(e) => {
+                    eprintln!("Unable to connect to remote asterisk ({})", e);
+                    std::process::exit(1);
                 }
-                std::process::exit(0);
-            }
-            None => {
-                eprintln!("No such command '{}' (type 'help' for available commands)", cmd_str);
-                std::process::exit(1);
             }
         }
     }
@@ -1992,10 +2183,10 @@ async fn main() {
     tokio::spawn(async move {
         use tokio::signal::unix::{signal, SignalKind};
 
-        let mut sigterm = signal(SignalKind::terminate())
-            .expect("failed to register SIGTERM handler");
-        let mut sigint = signal(SignalKind::interrupt())
-            .expect("failed to register SIGINT handler");
+        let mut sigterm =
+            signal(SignalKind::terminate()).expect("failed to register SIGTERM handler");
+        let mut sigint =
+            signal(SignalKind::interrupt()).expect("failed to register SIGINT handler");
 
         tokio::select! {
             _ = sigterm.recv() => {
@@ -2021,8 +2212,7 @@ async fn main() {
     tokio::spawn(async move {
         use tokio::signal::unix::{signal, SignalKind};
 
-        let mut sighup = signal(SignalKind::hangup())
-            .expect("failed to register SIGHUP handler");
+        let mut sighup = signal(SignalKind::hangup()).expect("failed to register SIGHUP handler");
 
         loop {
             sighup.recv().await;
@@ -2044,11 +2234,14 @@ async fn main() {
     // Start the Unix control socket EARLY -- before the full startup sequence.
     // This ensures that `asterisk -rx "core waitfullybooted"` can connect and
     // wait even while SIP, AMI, dialplan etc. are still loading.
-    let shared_state = Arc::new(tokio::sync::RwLock::new(state));
+    let shared_state = Arc::new(state);
     {
         let ss = shared_state.clone();
         if let Err(e) = start_control_socket(&run_dir, ss).await {
-            warn!("Failed to start control socket: {} (continuing without -rx support)", e);
+            warn!(
+                "Failed to start control socket: {} (continuing without -rx support)",
+                e
+            );
         }
     }
 
@@ -2063,18 +2256,13 @@ async fn main() {
 
     if console {
         // Console mode: interactive CLI via rustyline
-        // We need a non-async reference for the console loop
-        let state_guard = shared_state.blocking_read();
-        run_console(&state_guard);
+        run_console(&shared_state);
     } else if foreground {
         // Foreground mode without console: block on signals, log to stdout,
         // do NOT use rustyline (critical for test suite operation)
         info!("Running in foreground mode. PID: {}", std::process::id());
         loop {
-            let still_running = {
-                let s = shared_state.read().await;
-                s.running.load(Ordering::SeqCst)
-            };
+            let still_running = shared_state.running.load(Ordering::SeqCst);
             if !still_running {
                 break;
             }
@@ -2084,10 +2272,7 @@ async fn main() {
         // Daemon/background mode
         info!("Running in background mode. Use 'asterisk -r' to connect.");
         loop {
-            let still_running = {
-                let s = shared_state.read().await;
-                s.running.load(Ordering::SeqCst)
-            };
+            let still_running = shared_state.running.load(Ordering::SeqCst);
             if !still_running {
                 break;
             }

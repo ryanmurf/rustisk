@@ -251,7 +251,8 @@ mod tests {
         for _ in 0..200 {
             let output = agc.process(&signal);
             for &s in &output {
-                assert!(s >= i16::MIN && s <= i16::MAX);
+                assert_ne!(s, i16::MIN);
+                assert_ne!(s, i16::MAX);
             }
         }
     }

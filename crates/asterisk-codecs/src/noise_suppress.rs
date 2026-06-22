@@ -434,10 +434,8 @@ mod tests {
         let mut full_re = vec![0.0f32; n];
         let mut full_im = vec![0.0f32; n];
         let half = n / 2 + 1;
-        for i in 0..half {
-            full_re[i] = re[i];
-            full_im[i] = im[i];
-        }
+        full_re[..half].copy_from_slice(&re[..half]);
+        full_im[..half].copy_from_slice(&im[..half]);
         for i in 1..(n / 2) {
             full_re[n - i] = re[i];
             full_im[n - i] = -im[i];

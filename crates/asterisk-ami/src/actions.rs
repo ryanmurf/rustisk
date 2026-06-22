@@ -2161,13 +2161,11 @@ fn format_epoch_date(epoch: u64) -> String {
     } else {
         [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     };
-    let mut month = 1u32;
-    for &md in &month_days {
+    for (month, &md) in (1u32..).zip(month_days.iter()) {
         if remaining < md {
             return format!("{:04}-{:02}-{:02}", year, month, remaining + 1);
         }
         remaining -= md;
-        month += 1;
     }
     format!("{:04}-{:02}-{:02}", year, 12, remaining + 1)
 }

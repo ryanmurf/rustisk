@@ -542,7 +542,7 @@ mod tests {
 
         BRIDGE_STORE.insert(id.clone(), arc.clone());
         assert!(
-            bridge_count() >= initial + 1,
+            bridge_count() > initial,
             "count should increase after insert"
         );
         assert!(find_bridge(&id).is_some());
