@@ -319,9 +319,4 @@ mod tests {
         assert!(text.contains("hrirs_right"));
     }
 
-    #[test]
-    fn test_index_validation() {
-        // index_start must be < index_end
-        assert!(0 < 1); // basic sanity
-    }
 }

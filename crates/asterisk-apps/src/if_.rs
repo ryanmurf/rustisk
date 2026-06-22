@@ -271,13 +271,11 @@ fn approximate_month_day(secs: u64) -> (u32, u32) {
     } else {
         [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     };
-    let mut month = 1u32;
-    for &md in &month_days {
+    for (month, &md) in (1u32..).zip(month_days.iter()) {
         if remaining < md {
             return (month, remaining + 1);
         }
         remaining -= md;
-        month += 1;
     }
     (12, remaining + 1)
 }

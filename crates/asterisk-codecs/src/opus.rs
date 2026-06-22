@@ -463,10 +463,12 @@ mod tests {
 
     #[test]
     fn test_opus_sdp_to_fmtp() {
-        let mut attrs = OpusSdpAttributes::default();
-        attrs.maxplaybackrate = Some(16000);
-        attrs.stereo = Some(false);
-        attrs.useinbandfec = Some(true);
+        let attrs = OpusSdpAttributes {
+            maxplaybackrate: Some(16000),
+            stereo: Some(false),
+            useinbandfec: Some(true),
+            ..Default::default()
+        };
         let fmtp = attrs.to_fmtp();
         assert!(fmtp.contains("maxplaybackrate=16000"));
         assert!(fmtp.contains("stereo=0"));

@@ -453,11 +453,7 @@ fn main() {
 
     match parse_file(&args.file, &vars, args.verbose) {
         Ok(stats) => {
-            let avg = if stats.expr_count > 0 {
-                stats.total_size / stats.expr_count
-            } else {
-                0
-            };
+            let avg = stats.total_size.checked_div(stats.expr_count).unwrap_or(0);
             println!("\nExtended Expression Check Summary:");
             println!("  Expressions detected: {}", stats.expr_count);
             println!("  Expressions OK:       {}", stats.ok_count);

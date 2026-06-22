@@ -388,12 +388,12 @@ mod tests {
         // Skip edges (edge effects from windowing)
         let mid_start = output.len() / 4;
         let mid_end = output.len() * 3 / 4;
-        for i in mid_start..mid_end {
+        for (i, sample) in output.iter().enumerate().take(mid_end).skip(mid_start) {
             assert!(
-                (output[i] - 1000).abs() < 50,
+                (*sample - 1000).abs() < 50,
                 "DC preservation failed at index {}: got {}",
                 i,
-                output[i]
+                sample
             );
         }
     }

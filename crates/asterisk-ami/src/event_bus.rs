@@ -32,15 +32,26 @@ pub fn publish_event(event: AmiEvent) {
 mod tests {
     use super::*;
     use crate::events::EventCategory;
+    use std::time::Duration;
 
     #[tokio::test]
     async fn test_publish_and_receive() {
         let mut rx = AMI_EVENT_BUS.subscribe();
-        let event = AmiEvent::new("TestBusEvent", EventCategory::SYSTEM.0)
-            .with_header("Key", "Value");
+        let event =
+            AmiEvent::new("TestBusEvent", EventCategory::SYSTEM.0).with_header("Key", "Value");
         publish_event(event);
 
-        let received = rx.recv().await.unwrap();
+        let received = tokio::time::timeout(Duration::from_secs(1), async {
+            loop {
+                let event = rx.recv().await.unwrap();
+                if event.name == "TestBusEvent" {
+                    return event;
+                }
+            }
+        })
+        .await
+        .unwrap();
+
         assert_eq!(received.name, "TestBusEvent");
         assert_eq!(received.headers.get("Key").unwrap(), "Value");
     }
