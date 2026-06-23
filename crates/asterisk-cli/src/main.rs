@@ -1,4 +1,4 @@
-//! asterisk-cli: Main binary for the Asterisk Rust implementation.
+//! rustisk-cli: Main binary for Rustisk.
 //!
 //! This is the primary entry point that initializes all subsystems,
 //! loads configuration, registers codecs and modules, starts listeners,
@@ -6,8 +6,8 @@
 //!
 //! Port of main/asterisk.c and main/cli.c from Asterisk C.
 //!
-//! The binary is named `asterisk` to be a drop-in replacement for the
-//! real Asterisk binary's CLI interface.
+//! The CLI flags and console commands are compatible with the Asterisk
+//! binary's management interface.
 
 use clap::Parser;
 use std::collections::HashSet;
@@ -19,18 +19,17 @@ use std::time::{Duration, Instant};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tracing::{debug, error, info, warn};
 
-/// The version string that matches what the test harness expects.
-const ASTERISK_VERSION: &str = "Asterisk 22.0.0-rs";
+const RUSTISK_VERSION: &str = "Rustisk 0.1.0";
 
 /// Global flag indicating whether the daemon has completed its full startup
 /// sequence. Used by `core waitfullybooted` to block until ready.
 static FULLY_BOOTED: AtomicBool = AtomicBool::new(false);
 
-/// Asterisk-RS: An open source telephony toolkit (Rust implementation).
+/// Rustisk: An open source telephony toolkit.
 ///
-/// Command-line flags are compatible with the real Asterisk binary.
+/// Command-line flags are compatible with the Asterisk binary.
 #[derive(Parser, Debug)]
-#[command(name = "asterisk", about = "Asterisk PBX - Rust Edition")]
+#[command(name = "rustisk", about = "Rustisk PBX")]
 #[command(disable_version_flag = true)]
 struct Args {
     /// Use alternate configuration file
@@ -172,7 +171,7 @@ impl ServerState {
             start_time: Instant::now(),
             running,
             commands: Vec::new(),
-            version: ASTERISK_VERSION.to_string(),
+            version: RUSTISK_VERSION.to_string(),
             config_dir: config_dir.to_string(),
             run_dir: run_dir.to_string(),
             verbose_level: Arc::new(AtomicU8::new(0)),
@@ -1476,7 +1475,7 @@ fn print_banner(quiet: bool) {
         return;
     }
     println!("======================================================================");
-    println!("  {}", ASTERISK_VERSION);
+    println!("  {}", RUSTISK_VERSION);
     println!("  An open source telephony toolkit");
     println!("======================================================================");
     println!();
@@ -1937,7 +1936,7 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
                                                 "INVITE, ACK, CANCEL, BYE, OPTIONS, REFER, NOTIFY",
                                             );
                                             ok_resp.add_header("Accept", "application/sdp");
-                                            ok_resp.add_header("Server", "Asterisk-RS/0.1.0");
+                                            ok_resp.add_header("Server", "Rustisk/0.1.0");
                                             let _ = transport_for_options
                                                 .send(&ok_resp, remote_addr)
                                                 .await;
@@ -2006,7 +2005,7 @@ async fn startup_sequence(config_dir: &str, dirs: &AsteriskDirs) {
     }));
 
     info!(
-        "Asterisk-RS ready. {} apps registered, {} channel techs",
+        "Rustisk ready. {} apps registered, {} channel techs",
         asterisk_core::pbx::app_registry::APP_REGISTRY.count(),
         TECH_REGISTRY.count()
     );
@@ -2033,7 +2032,7 @@ fn run_console(state: &ServerState) {
     let history_path = dirs_home().join(".asterisk_history");
     let _ = rl.load_history(&history_path);
 
-    println!("Asterisk-RS console ready. Type 'help' for available commands.");
+    println!("Rustisk console ready. Type 'help' for available commands.");
     println!();
 
     while state.running.load(Ordering::SeqCst) {
@@ -2130,7 +2129,7 @@ async fn main() {
 
     // Handle -V / --version: print version and exit immediately
     if args.show_version {
-        println!("{}", ASTERISK_VERSION);
+        println!("{}", RUSTISK_VERSION);
         std::process::exit(0);
     }
 
@@ -2252,7 +2251,7 @@ async fn main() {
     // `core waitfullybooted` connections will now unblock.
     FULLY_BOOTED.store(true, Ordering::SeqCst);
     asterisk_ami::set_fully_booted();
-    info!("Asterisk-RS is fully booted.");
+    info!("Rustisk is fully booted.");
 
     if console {
         // Console mode: interactive CLI via rustyline

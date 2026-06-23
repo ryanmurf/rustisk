@@ -259,7 +259,7 @@ pub fn build_message(
         },
         SipHeader {
             name: header_names::USER_AGENT.to_string(),
-            value: "Asterisk-RS/0.1.0".to_string(),
+            value: "Rustisk/0.1.0".to_string(),
         },
     ];
 

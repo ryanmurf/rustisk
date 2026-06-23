@@ -412,8 +412,8 @@ fn handle_core_settings(
     _context: &ActionContext,
 ) -> AmiResponse {
     AmiResponse::success("Core Settings")
-        .with_header("AsteriskVersion", "Asterisk 22.0.0-rs")
-        .with_header("SystemName", "asterisk-rs")
+        .with_header("AsteriskVersion", "Rustisk 0.1.0")
+        .with_header("SystemName", "Rustisk")
         .with_header("AMIversion", "11.0.0")
         .with_header("MaxCalls", "0")
         .with_header("MaxLoadAvg", "0.0")
@@ -958,7 +958,7 @@ pub fn execute_cli_command(command: &str) -> Vec<String> {
         lines.push(format!("{} active channel(s)", count));
         lines
     } else if cmd_lower.starts_with("core show version") {
-        vec!["Asterisk 22.0.0-rs".to_string()]
+        vec!["Rustisk 0.1.0".to_string()]
     } else if cmd_lower.starts_with("core show uptime") {
         vec!["System uptime: 00:00:00".to_string()]
     } else if cmd_lower.starts_with("pjsip send notify") {

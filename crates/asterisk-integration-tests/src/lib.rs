@@ -1,4 +1,4 @@
-//! Integration tests exercising multiple asterisk-rs crates working together.
+//! Integration tests exercising multiple Rustisk crates working together.
 
 #[cfg(test)]
 mod tests {

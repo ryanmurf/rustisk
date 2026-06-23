@@ -50,7 +50,7 @@ impl Default for CurlOptions {
         Self {
             connect_timeout: 30,
             max_time: 120,
-            user_agent: "asterisk-rs-curl/1.0".to_string(),
+            user_agent: "rustisk-curl/1.0".to_string(),
             proxy: String::new(),
             ssl_verify: true,
             headers: Vec::new(),

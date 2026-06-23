@@ -1,4 +1,4 @@
-//! OpenTelemetry telemetry integration for Asterisk.
+//! OpenTelemetry telemetry integration for Rustisk.
 //!
 //! Provides distributed tracing capabilities for SIP calls and transactions,
 //! enabling observability across hops and systems. Uses OTLP to export traces
@@ -21,7 +21,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 ///
 /// Configuration is done via environment variables:
 /// - `OTEL_EXPORTER_OTLP_ENDPOINT`: OTLP endpoint (default: http://localhost:4317)
-/// - `OTEL_SERVICE_NAME`: Service name (default: asterisk-rs)
+/// - `OTEL_SERVICE_NAME`: Service name (default: rustisk)
 ///
 /// # Returns
 ///
@@ -30,8 +30,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 pub fn init_telemetry(
     env_filter: tracing_subscriber::EnvFilter,
 ) -> Result<TelemetryGuard, Box<dyn std::error::Error + Send + Sync>> {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "asterisk-rs".to_string());
+    let service_name = std::env::var("OTEL_SERVICE_NAME").unwrap_or_else(|_| "rustisk".to_string());
 
     let otlp_endpoint = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT")
         .unwrap_or_else(|_| "http://localhost:4317".to_string());
@@ -63,7 +62,7 @@ pub fn init_telemetry(
     // Get a tracer from the SDK provider (returns SdkTracer, which
     // implements PreSampledTracer -- required by OpenTelemetryLayer).
     use opentelemetry::trace::TracerProvider as _;
-    let tracer = provider.tracer("asterisk-rs");
+    let tracer = provider.tracer("rustisk");
 
     // Also register as the global provider so that other parts of the
     // codebase can obtain a BoxedTracer via `opentelemetry::global::tracer()`.

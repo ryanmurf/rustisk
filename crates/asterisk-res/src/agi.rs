@@ -329,7 +329,7 @@ impl AgiEnvironment {
             language: channel.language.clone(),
             channel_type: channel.name.split('/').next().unwrap_or("Unknown").to_string(),
             uniqueid: channel.unique_id.0.clone(),
-            version: "asterisk-rs 0.1.0".to_string(),
+            version: "Rustisk 0.1.0".to_string(),
             callerid: channel.caller.id.number.number.clone(),
             calleridname: channel.caller.id.name.name.clone(),
             callingpres: "0".to_string(),

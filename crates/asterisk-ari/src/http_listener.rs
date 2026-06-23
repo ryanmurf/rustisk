@@ -260,7 +260,7 @@ fn format_http_response(response: &AriResponse) -> String {
     let body_len = response.body.as_ref().map(|b| b.len()).unwrap_or(0);
 
     let mut resp = format!("HTTP/1.1 {} {}\r\n", response.status, reason);
-    resp.push_str("Server: Asterisk-RS/0.1.0\r\n");
+    resp.push_str("Server: Rustisk/0.1.0\r\n");
     resp.push_str(&format!("Content-Type: {}\r\n", response.content_type));
     resp.push_str(&format!("Content-Length: {}\r\n", body_len));
     resp.push_str("Connection: close\r\n");

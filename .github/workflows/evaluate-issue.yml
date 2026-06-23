@@ -45,7 +45,7 @@ jobs:
             }
 
             // Call GitHub Models API for evaluation
-            const systemPrompt = `You evaluate GitHub issues for the open-source Rust library "asterisk-rs" (Asterisk AMI/ARI bindings).
+            const systemPrompt = `You evaluate GitHub issues for the open-source Rust telephony toolkit "Rustisk" (AMI/ARI bindings).
             Decide if an automated coding agent could resolve this issue.
 
             Answer YES if:

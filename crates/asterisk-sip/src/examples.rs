@@ -14,7 +14,7 @@ pub fn example_invite_with_sdp() -> Result<String, Box<dyn std::error::Error>> {
         .call_id_auto()
         .cseq(1)
         .contact("sip:bob@192.168.1.10:5060")
-        .user_agent("asterisk-rs/0.1.0")
+        .user_agent("Rustisk/0.1.0")
         .allow(&["INVITE", "ACK", "BYE", "CANCEL", "OPTIONS"])
         .sdp(
             "v=0\r\n\
@@ -36,11 +36,11 @@ pub fn example_register_with_authentication() -> Result<String, Box<dyn std::err
         .to("sip:bob@proxy.example.com")?
         .from("sip:bob@proxy.example.com")
         .via_tcp("10.0.0.5:5060")
-        .call_id("reg-12345@asterisk-rs")
+        .call_id("reg-12345@rustisk")
         .cseq(1)
         .contact("sip:bob@10.0.0.5:5060")
         .expires(3600)
-        .user_agent("asterisk-rs SIP UA")
+        .user_agent("Rustisk SIP UA")
         .header("Authorization", "Digest username=\"bob\", realm=\"example.com\", nonce=\"abc123\", uri=\"sip:proxy.example.com\", response=\"def456\"")
         .build()?;
 
@@ -68,7 +68,7 @@ pub fn example_options_ping() -> Result<String, Box<dyn std::error::Error>> {
         .call_id_auto()
         .cseq(1)
         .allow(&["INVITE", "ACK", "BYE", "CANCEL", "OPTIONS", "REGISTER", "INFO"])
-        .user_agent("asterisk-rs/0.1.0")
+        .user_agent("Rustisk/0.1.0")
         .build()?;
 
     Ok(options.to_string())
@@ -82,7 +82,7 @@ pub fn example_secure_invite() -> Result<String, Box<dyn std::error::Error>> {
         .call_id_auto()
         .cseq(1)
         .contact("sips:bob@secure.example.com:5061")
-        .user_agent("asterisk-rs/0.1.0")
+        .user_agent("Rustisk/0.1.0")
         .header("Supported", "100rel,timer,replaces,norefersub")
         .header("Session-Expires", "1800")
         .sdp(

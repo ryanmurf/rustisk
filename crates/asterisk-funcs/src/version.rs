@@ -3,7 +3,7 @@
 //! Port of func_version.c from Asterisk C.
 //!
 //! Provides:
-//! - VERSION([info]) - return Asterisk version info
+//! - VERSION([info]) - return Rustisk version info
 //!
 //! Info fields:
 //! - (empty) - full version string (e.g., "21.0.0")
@@ -17,10 +17,10 @@
 
 use crate::{DialplanFunc, FuncContext, FuncError, FuncResult};
 
-/// The version string for this Asterisk-RS build.
-pub const ASTERISK_RS_VERSION: &str = "21.0.0-rs";
+/// The version string for this Rustisk build.
+pub const RUSTISK_VERSION: &str = "Rustisk 0.1.0";
 /// Numeric version (21.0.0 -> 210000).
-pub const ASTERISK_RS_VERSION_NUM: &str = "210000";
+pub const RUSTISK_VERSION_NUM: &str = "100";
 
 /// VERSION() function.
 pub struct FuncVersion;
@@ -33,8 +33,8 @@ impl DialplanFunc for FuncVersion {
     fn read(&self, _ctx: &FuncContext, args: &str) -> FuncResult {
         let field = args.trim().to_uppercase();
         match field.as_str() {
-            "" => Ok(ASTERISK_RS_VERSION.to_string()),
-            "ASTERISK_VERSION_NUM" => Ok(ASTERISK_RS_VERSION_NUM.to_string()),
+            "" => Ok(RUSTISK_VERSION.to_string()),
+            "ASTERISK_VERSION_NUM" => Ok(RUSTISK_VERSION_NUM.to_string()),
             "BUILD_USER" => Ok(std::env::var("USER").unwrap_or_else(|_| "unknown".into())),
             "BUILD_HOSTNAME" => Ok("localhost".to_string()),
             "BUILD_MACHINE" => Ok(std::env::consts::ARCH.to_string()),
@@ -70,7 +70,7 @@ mod tests {
         let ctx = FuncContext::new();
         let func = FuncVersion;
         let result = func.read(&ctx, "").unwrap();
-        assert_eq!(result, ASTERISK_RS_VERSION);
+        assert_eq!(result, RUSTISK_VERSION);
     }
 
     #[test]
@@ -78,7 +78,7 @@ mod tests {
         let ctx = FuncContext::new();
         let func = FuncVersion;
         let result = func.read(&ctx, "ASTERISK_VERSION_NUM").unwrap();
-        assert_eq!(result, ASTERISK_RS_VERSION_NUM);
+        assert_eq!(result, RUSTISK_VERSION_NUM);
     }
 
     #[test]
@@ -101,6 +101,6 @@ mod tests {
         let ctx = FuncContext::new();
         let func = FuncAsteriskVersion;
         let result = func.read(&ctx, "").unwrap();
-        assert_eq!(result, ASTERISK_RS_VERSION);
+        assert_eq!(result, RUSTISK_VERSION);
     }
 }

@@ -1,6 +1,6 @@
 # OpenTelemetry Tracing Integration
 
-This document describes the OpenTelemetry tracing implementation added to the Asterisk Rust codebase.
+This document describes the OpenTelemetry tracing implementation added to Rustisk.
 
 ## Overview
 
@@ -34,24 +34,24 @@ The implementation provides distributed tracing capabilities for SIP calls and t
 The telemetry system is configured via environment variables:
 
 - `OTEL_EXPORTER_OTLP_ENDPOINT`: OTLP endpoint (default: http://localhost:4317)
-- `OTEL_SERVICE_NAME`: Service name (default: asterisk-rs)
+- `OTEL_SERVICE_NAME`: Service name (default: rustisk)
 - `OTEL_SERVICE_VERSION`: Service version (default: 0.1.0)
 - `OTEL_RESOURCE_ATTRIBUTES`: Additional resource attributes
 - `OTEL_DISABLE`: Set to "true" to disable OpenTelemetry
 
 ## Usage
 
-### Starting Asterisk with Tracing
+### Starting Rustisk with Tracing
 
 ```bash
 # Start with default OTLP endpoint
-./asterisk
+./rustisk
 
 # Start with custom endpoint  
-OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:14250 ./asterisk
+OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:14250 ./rustisk
 
 # Start with telemetry disabled
-OTEL_DISABLE=true ./asterisk
+OTEL_DISABLE=true ./rustisk
 ```
 
 ### SIP Message Tracing
@@ -161,9 +161,9 @@ To test with a real observability backend:
 docker run -d -p 14250:14250 -p 16686:16686 jaegertracing/all-in-one:latest
 ```
 
-2. Run Asterisk:
+2. Run Rustisk:
 ```bash  
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:14250 ./asterisk -vvv
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:14250 ./rustisk -vvv
 ```
 
 3. Generate SIP traffic and view traces at http://localhost:16686

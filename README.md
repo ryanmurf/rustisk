@@ -1,8 +1,8 @@
-# asterisk-rs
+# Rustisk
 
-**Asterisk PBX rewritten in Rust -- 2-5x faster, memory-safe**
+**A Rust-native PBX and telephony toolkit with Asterisk-compatible concepts**
 
-[![CI](https://github.com/ryanmurf/asterisk-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/ryanmurf/asterisk-rs/actions/workflows/ci.yml)
+[![CI](https://github.com/ryanmurf/rustisk/actions/workflows/ci.yml/badge.svg)](https://github.com/ryanmurf/rustisk/actions/workflows/ci.yml)
 [![License: GPL-2.0-only](https://img.shields.io/badge/License-GPL--2.0--only-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
 
@@ -12,7 +12,7 @@
 
 **This project is NOT production ready.**
 
-asterisk-rs is an experimental research project that demonstrates the feasibility of rewriting a large C telecom system (Asterisk) in Rust. It is not affiliated with Sangoma, Digium, or the Asterisk project.
+Rustisk is an experimental research project that demonstrates the feasibility of rebuilding a large C telecom system in Rust. It is not affiliated with Sangoma, Digium, or the Asterisk project.
 
 **Do not use this for production telephony.** It may drop calls, misroute audio, or behave in unexpected ways. Use the official [Asterisk](https://www.asterisk.org/) for anything that matters.
 
@@ -20,7 +20,7 @@ asterisk-rs is an experimental research project that demonstrates the feasibilit
 
 ## What is this?
 
-A complete rewrite of the [Asterisk PBX](https://www.asterisk.org/) from C to Rust:
+Rustisk is a Rust-native PBX and telephony toolkit that tracks the architecture, configuration style, and management interfaces familiar to Asterisk users:
 
 - **1.16 million lines of C** rewritten as **~204K lines of Rust**
 - **18 crates** in a Cargo workspace
@@ -62,9 +62,9 @@ A complete rewrite of the [Asterisk PBX](https://www.asterisk.org/) from C to Ru
 - OpenTelemetry tracing with OTLP export
 - CDR (Call Detail Records)
 
-## Enhancements Over Original Asterisk
+## Rustisk Compared With Original Asterisk
 
-| | Original Asterisk (C) | asterisk-rs (Rust) |
+| | Original Asterisk (C) | Rustisk (Rust) |
 |---|---|---|
 | **Memory safety** | Manual malloc/free | Ownership system, no buffer overflows or use-after-free |
 | **SIP performance** | pjproject | Pure Rust, 2-5x faster message processing |
@@ -77,7 +77,7 @@ A complete rewrite of the [Asterisk PBX](https://www.asterisk.org/) from C to Ru
 
 | Crate | Purpose | Lines |
 |---|---|---|
-| `asterisk-cli` | Main binary, CLI console | 2.1K |
+| `rustisk-cli` | Main binary, CLI console | 2.1K |
 | `asterisk-core` | PBX engine, bridging, channel lifecycle | 12.5K |
 | `asterisk-sip` | Pure Rust SIP stack (RFC 3261) | 37.4K |
 | `asterisk-apps` | 78 dialplan applications | 32.5K |
@@ -108,13 +108,13 @@ cargo build --release
 
 ```bash
 # Foreground with console
-./target/release/asterisk -f -c
+./target/release/rustisk -f -c
 
 # Foreground with core dump enabled
-./target/release/asterisk -f -g -c
+./target/release/rustisk -f -g -c
 
 # With OpenTelemetry tracing
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 ./target/release/asterisk -f -g
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 ./target/release/rustisk -f -g
 ```
 
 ### Configuration
@@ -139,7 +139,7 @@ The workspace includes **4,200+ tests** covering SIP parsing, dialplan execution
 
 ## Performance
 
-| Benchmark | pjproject (C) | asterisk-rs (Rust) | Speedup |
+| Benchmark | pjproject (C) | Rustisk (Rust) | Speedup |
 |---|---|---|---|
 | SIP message parse | baseline | 2-5x faster | 2-5x |
 | SIP transaction throughput | baseline | 2-3x faster | 2-3x |

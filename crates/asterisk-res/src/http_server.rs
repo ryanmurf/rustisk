@@ -271,7 +271,7 @@ pub struct HttpResponse {
 impl HttpResponse {
     pub fn new(status: HttpStatus) -> Self {
         let mut headers = HashMap::new();
-        headers.insert("Server".to_string(), "Asterisk-RS/0.1.0".to_string());
+        headers.insert("Server".to_string(), "Rustisk/0.1.0".to_string());
         headers.insert("Connection".to_string(), "close".to_string());
         Self {
             status,

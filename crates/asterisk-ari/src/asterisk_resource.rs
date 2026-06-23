@@ -129,7 +129,7 @@ fn handle_get_info(req: &AriRequest, _server: &AriServer) -> AriResponse {
         },
         config: if include_config {
             Some(ConfigInfo {
-                name: "asterisk-rs".to_string(),
+                name: "Rustisk".to_string(),
                 default_language: "en".to_string(),
                 max_channels: None,
                 max_open_files: None,

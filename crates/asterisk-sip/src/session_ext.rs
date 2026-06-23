@@ -281,7 +281,7 @@ pub fn build_reinvite(
         },
         SipHeader {
             name: header_names::USER_AGENT.to_string(),
-            value: "Asterisk-RS/0.1.0".to_string(),
+            value: "Rustisk/0.1.0".to_string(),
         },
         SipHeader {
             name: header_names::ALLOW.to_string(),

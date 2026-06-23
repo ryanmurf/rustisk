@@ -240,7 +240,7 @@ impl SipSession {
             SipHeader { name: header_names::CALL_ID.to_string(), value: self.call_id.clone() },
             SipHeader { name: header_names::CSEQ.to_string(), value: "1 INVITE".to_string() },
             SipHeader { name: header_names::CONTACT.to_string(), value: format!("<{}>", contact_uri) },
-            SipHeader { name: header_names::USER_AGENT.to_string(), value: "Asterisk-RS/0.1.0".to_string() },
+            SipHeader { name: header_names::USER_AGENT.to_string(), value: "Rustisk/0.1.0".to_string() },
             SipHeader { name: header_names::ALLOW.to_string(), value: "INVITE, ACK, CANCEL, BYE, OPTIONS, REFER, NOTIFY".to_string() },
         ];
 

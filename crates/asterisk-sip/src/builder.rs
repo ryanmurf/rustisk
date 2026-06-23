@@ -541,7 +541,7 @@ fn generate_branch() -> String {
 }
 
 fn generate_call_id() -> String {
-    format!("{}@asterisk-rs", Uuid::new_v4())
+    format!("{}@rustisk", Uuid::new_v4())
 }
 
 // Extension trait for SipMethod is not needed as as_str() already exists
@@ -560,7 +560,7 @@ mod tests {
             .call_id_auto()
             .cseq(1)
             .contact("bob@10.0.0.1")
-            .user_agent("asterisk-rs/0.1.0")
+            .user_agent("Rustisk/0.1.0")
             .sdp("v=0\r\no=- 123456 789012 IN IP4 10.0.0.1\r\n")
             .build()
             .expect("Failed to build INVITE");

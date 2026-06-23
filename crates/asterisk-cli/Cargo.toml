@@ -1,11 +1,11 @@
 [package]
-name = "asterisk-cli"
+name = "rustisk-cli"
 version.workspace = true
 license.workspace = true
 edition.workspace = true
 
 [[bin]]
-name = "asterisk"
+name = "rustisk"
 path = "src/main.rs"
 
 [dependencies]

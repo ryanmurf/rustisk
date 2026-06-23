@@ -36,7 +36,7 @@ impl Fixture {
             .unwrap()
             .as_nanos();
         let root = std::env::temp_dir().join(format!(
-            "asterisk-cli-startup-{}-{}-{}",
+            "rustisk-cli-startup-{}-{}-{}",
             std::process::id(),
             now,
             id
@@ -107,7 +107,7 @@ impl CapturedOutput {
 }
 
 fn binary() -> &'static str {
-    env!("CARGO_BIN_EXE_asterisk")
+    env!("CARGO_BIN_EXE_rustisk")
 }
 
 fn command_for(fixture: &Fixture) -> Command {
@@ -220,7 +220,7 @@ fn console_mode_with_foreground_and_dump_core_reaches_prompt() {
     assert!(!output.timed_out, "{}", output.combined());
     assert!(output.status.success(), "{}", output.combined());
     assert!(
-        output.stdout.contains("Asterisk-RS console ready"),
+        output.stdout.contains("Rustisk console ready"),
         "{}",
         output.combined()
     );
@@ -249,7 +249,7 @@ fn foreground_mode_without_console_waits_for_shutdown_signal() {
     assert!(!output.timed_out, "{}", output.combined());
     assert!(output.status.success(), "{}", output.combined());
     assert!(
-        !output.stdout.contains("Asterisk-RS console ready"),
+        !output.stdout.contains("Rustisk console ready"),
         "{}",
         output.combined()
     );
@@ -271,7 +271,7 @@ fn always_fork_flag_does_not_enter_console_mode() {
     assert!(!output.timed_out, "{}", output.combined());
     assert!(output.status.success(), "{}", output.combined());
     assert!(
-        !output.stdout.contains("Asterisk-RS console ready"),
+        !output.stdout.contains("Rustisk console ready"),
         "{}",
         output.combined()
     );
@@ -293,7 +293,7 @@ fn remote_execution_accepts_upstream_x_forms_and_socket_override() {
     assert!(!remote_rx.timed_out, "{}", remote_rx.combined());
     assert!(remote_rx.status.success(), "{}", remote_rx.combined());
     assert!(
-        remote_rx.stdout.contains("Asterisk 22.0.0-rs"),
+        remote_rx.stdout.contains("Rustisk 0.1.0"),
         "{}",
         remote_rx.combined()
     );
@@ -307,7 +307,7 @@ fn remote_execution_accepts_upstream_x_forms_and_socket_override() {
     assert!(!bare_x.timed_out, "{}", bare_x.combined());
     assert!(bare_x.status.success(), "{}", bare_x.combined());
     assert!(
-        bare_x.stdout.contains("Asterisk 22.0.0-rs"),
+        bare_x.stdout.contains("Rustisk 0.1.0"),
         "{}",
         bare_x.combined()
     );
@@ -331,7 +331,7 @@ fn remote_execution_accepts_upstream_x_forms_and_socket_override() {
         socket_override.combined()
     );
     assert!(
-        socket_override.stdout.contains("Asterisk 22.0.0-rs"),
+        socket_override.stdout.contains("Rustisk 0.1.0"),
         "{}",
         socket_override.combined()
     );
@@ -349,7 +349,7 @@ fn remote_execution_accepts_upstream_x_forms_and_socket_override() {
         remote_console.combined()
     );
     assert!(
-        remote_console.stdout.contains("Asterisk 22.0.0-rs"),
+        remote_console.stdout.contains("Rustisk 0.1.0"),
         "{}",
         remote_console.combined()
     );
@@ -381,7 +381,7 @@ fn bare_x_without_running_daemon_fails_as_remote_execution() {
         output.combined()
     );
     assert!(
-        !output.stdout.contains("Asterisk-RS console ready"),
+        !output.stdout.contains("Rustisk console ready"),
         "{}",
         output.combined()
     );

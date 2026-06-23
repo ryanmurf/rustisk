@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Integration test suite for asterisk-rs.
+Integration test suite for Rustisk.
 
 Tests the running daemon's SIP (UDP 5060) and AMI (TCP 5038) interfaces
 using raw socket I/O -- no external dependencies required beyond Python 3.
@@ -25,8 +25,8 @@ import traceback
 # ---------------------------------------------------------------------------
 
 BINARY = os.environ.get(
-    "ASTERISK_RS_BIN",
-    os.path.join(os.path.dirname(__file__), "..", "..", "target", "release", "asterisk-cli"),
+    "RUSTISK_BIN",
+    os.path.join(os.path.dirname(__file__), "..", "..", "target", "release", "rustisk"),
 )
 
 SIP_PORT = 5060
@@ -37,7 +37,7 @@ AMI_USER = "admin"
 AMI_PASS = "admin"
 STARTUP_WAIT = 2       # seconds to wait for daemon to be ready
 RECV_TIMEOUT = 5        # seconds timeout for socket reads
-CONFIG_DIR = "/tmp/asterisk-rs-test-config"
+CONFIG_DIR = "/tmp/rustisk-test-config"
 
 
 # ---------------------------------------------------------------------------
@@ -63,7 +63,7 @@ class TestResult:
 
 
 class DaemonManager:
-    """Manages starting/stopping the asterisk-rs daemon."""
+    """Manages starting/stopping the Rustisk daemon."""
 
     def __init__(self, binary_path):
         self.binary = os.path.realpath(binary_path)
@@ -206,7 +206,7 @@ def build_sip_invite(to_user="s", call_id=None, branch=None, from_tag=None):
     sdp_body = (
         "v=0\r\n"
         "o=- 0 0 IN IP4 127.0.0.1\r\n"
-        "s=asterisk-rs-test\r\n"
+        "s=rustisk-test\r\n"
         "c=IN IP4 127.0.0.1\r\n"
         "t=0 0\r\n"
         "m=audio 10000 RTP/AVP 0 8\r\n"
@@ -1117,7 +1117,7 @@ def run_all_tests():
         sys.exit(1)
 
     print("=" * 72)
-    print("  asterisk-rs Integration Test Suite")
+    print("  Rustisk Integration Test Suite")
     print("=" * 72)
     print()
 
