@@ -10,7 +10,7 @@ members = [
     "crates/asterisk-funcs",
     "crates/asterisk-sip",
     "crates/asterisk-cdr",
-    "crates/asterisk-cli",
+    "crates/rustisk-cli",
     "crates/asterisk-res",
     "crates/asterisk-ami",
     "crates/asterisk-ari",
